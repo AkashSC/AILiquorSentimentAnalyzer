@@ -10,8 +10,21 @@ import matplotlib.pyplot as plt
 # ===============================
 st.set_page_config(page_title="🍷 Liquor Market Sentiment AI", layout="wide")
 
+# Custom CSS for smaller font + wrap text
+st.markdown("""
+    <style>
+    body, div, p, input, textarea, span, label {
+        font-size: 13px !important;
+    }
+    .stDataFrame div[data-testid="stDataFrame"] {
+        font-size: 12px !important;
+        white-space: normal !important;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
-GROQ_MODEL = "llama-3.1-8b-instant"   # Free & lightweight option
+GROQ_MODEL = "llama-3-groq-8b-tool-use"
 
 # ===============================
 # Helper: Call Groq API
@@ -73,7 +86,7 @@ with tab1:
     with col2:
         flavor = st.text_input("Flavor / Variant", placeholder="e.g., Honey, Classic")
 
-    feedback_text = st.text_area("Customer Feedback", placeholder="Enter feedback here...", height=150)
+    feedback_text = st.text_area("Customer Feedback", placeholder="Enter feedback here...", height=120)
 
     if st.button("🔍 Analyze Sentiment"):
         if brand and feedback_text:
@@ -101,16 +114,15 @@ with tab2:
             {
                 "Brand": item["brand"],
                 "Flavor": item["flavor"],
-                "Feedback": item["feedback"],
-                "Analysis": item["result"].get("raw", str(item["result"]))
+                "Feedback & Analysis": f"Feedback: {item['feedback']}\n\nAnalysis: {item['result'].get('raw', str(item['result']))}"
             }
             for item in st.session_state.feedback_data
         ])
 
         st.subheader("📋 Recent Feedback & Analysis")
-        st.dataframe(df, use_container_width=True)
+        st.dataframe(df, use_container_width=True, height=300)
 
-        # Simple trend chart by brand (count of positive/negative/neutral mentions)
+        # Small bar chart
         st.subheader("📈 Brand Sentiment Trend")
         sentiment_summary = []
         for item in st.session_state.feedback_data:
@@ -125,8 +137,10 @@ with tab2:
         trend_df = pd.DataFrame(sentiment_summary, columns=["Brand", "Sentiment"])
         counts = trend_df.groupby(["Brand", "Sentiment"]).size().unstack(fill_value=0)
 
-        fig, ax = plt.subplots(figsize=(6, 4))
-        counts.plot(kind="bar", stacked=True, ax=ax)
-        ax.set_ylabel("Feedback Count")
-        ax.set_title("Brand Sentiment Trends")
+        fig, ax = plt.subplots(figsize=(4, 3))  # smaller chart
+        counts.plot(kind="bar", stacked=True, ax=ax, legend=True)
+        ax.set_ylabel("Count")
+        ax.set_title("Brand Sentiment Trends", fontsize=11)
+        plt.xticks(rotation=30, ha="right")
+        plt.tight_layout()
         st.pyplot(fig)
