@@ -150,7 +150,7 @@ with tab2:
             kind="bar",
             stacked=True,
             ax=ax,
-            width=0.5
+            width=0.5,
             color=[colors.get(sent, "blue") for sent in counts.columns],
             legend=True
         )
