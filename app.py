@@ -139,23 +139,28 @@ with tab2:
         trend_df = pd.DataFrame(sentiment_summary, columns=["Brand", "Sentiment"])
         counts = trend_df.groupby(["Brand", "Sentiment"]).size().unstack(fill_value=0)
 
-               # Place chart in a medium column
+                       # Place chart in a medium column
         col_chart, _ = st.columns([2, 1])  # chart takes medium space
         with col_chart:
             fig, ax = plt.subplots(figsize=(4.5, 3), dpi=120)  # medium box
 
+            # Fixed color mapping
             colors = {"Positive": "green", "Negative": "red", "Neutral": "gray"}
+            ordered_cols = ["Positive", "Negative", "Neutral"]
 
             # Convert counts to percentages
             percent_df = counts.div(counts.sum(axis=1), axis=0) * 100
+
+            # Reindex to enforce consistent column order
+            percent_df = percent_df.reindex(columns=ordered_cols, fill_value=0)
 
             percent_df.plot(
                 kind="bar",
                 stacked=True,
                 ax=ax,
                 width=0.35,
-                color=[colors.get(sent, "blue") for sent in percent_df.columns],
-                legend=False  # disable default legend
+                color=[colors[c] for c in percent_df.columns],
+                legend=False
             )
 
             # Add percentage labels outside the bars
@@ -178,20 +183,14 @@ with tab2:
             plt.xticks(rotation=30, ha="right", fontsize=7)
 
             # Add custom legend on the right side
-            handles = [
-                plt.Rectangle((0, 0), 1, 1, color=colors["Positive"]),
-                plt.Rectangle((0, 0), 1, 1, color=colors["Negative"]),
-                plt.Rectangle((0, 0), 1, 1, color=colors["Neutral"])
-            ]
+            handles = [plt.Rectangle((0, 0), 1, 1, color=colors[c]) for c in ordered_cols]
             ax.legend(
-                handles, ["Positive", "Negative", "Neutral"],
+                handles, ordered_cols,
                 loc="center left",
-                bbox_to_anchor=(1.02, 0.5),   # push legend outside to the right
+                bbox_to_anchor=(1.02, 0.5),  # outside right
                 fontsize=8,
                 frameon=False
             )
 
             plt.tight_layout()
             st.pyplot(fig, clear_figure=True)
-
-
