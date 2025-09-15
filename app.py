@@ -139,7 +139,7 @@ with tab2:
         trend_df = pd.DataFrame(sentiment_summary, columns=["Brand", "Sentiment"])
         counts = trend_df.groupby(["Brand", "Sentiment"]).size().unstack(fill_value=0)
 
-       # Place chart in a medium column
+               # Place chart in a medium column
         col_chart, _ = st.columns([2, 1])  # chart takes medium space
         with col_chart:
             fig, ax = plt.subplots(figsize=(4.5, 3), dpi=120)  # medium box
@@ -153,19 +153,19 @@ with tab2:
                 kind="bar",
                 stacked=True,
                 ax=ax,
-                width=0.35,   # thinner bars
+                width=0.35,
                 color=[colors.get(sent, "blue") for sent in percent_df.columns],
-                legend=True
+                legend=False  # disable default legend
             )
 
-            # Show sentiment % labels OUTSIDE the bar box
+            # Add percentage labels outside the bars
             for container in ax.containers:
                 for bar in container:
                     value = bar.get_height()
                     if value > 0:
                         ax.text(
                             bar.get_x() + bar.get_width() / 2,
-                            bar.get_y() + bar.get_height() + 1,   # position ABOVE bar
+                            bar.get_y() + bar.get_height() + 1,
                             f"{value:.0f}%",
                             ha="center",
                             va="bottom",
@@ -176,6 +176,22 @@ with tab2:
             ax.set_ylabel("Share (%)", fontsize=8)
             ax.set_title("Sentiment by Brand", fontsize=9)
             plt.xticks(rotation=30, ha="right", fontsize=7)
+
+            # Add custom legend on the right side
+            handles = [
+                plt.Rectangle((0, 0), 1, 1, color=colors["Positive"]),
+                plt.Rectangle((0, 0), 1, 1, color=colors["Negative"]),
+                plt.Rectangle((0, 0), 1, 1, color=colors["Neutral"])
+            ]
+            ax.legend(
+                handles, ["Positive", "Negative", "Neutral"],
+                loc="center left",
+                bbox_to_anchor=(1.02, 0.5),   # push legend outside to the right
+                fontsize=8,
+                frameon=False
+            )
+
             plt.tight_layout()
             st.pyplot(fig, clear_figure=True)
+
 
