@@ -122,7 +122,7 @@ with tab2:
         st.subheader("📋 Recent Feedback & Analysis")
         st.dataframe(df, use_container_width=True, height=300)
 
-        # Small bar chart
+        # Small bar chart with color coding + labels outside
         st.subheader("📈 Brand Sentiment Trend")
         sentiment_summary = []
         for item in st.session_state.feedback_data:
@@ -137,10 +137,30 @@ with tab2:
         trend_df = pd.DataFrame(sentiment_summary, columns=["Brand", "Sentiment"])
         counts = trend_df.groupby(["Brand", "Sentiment"]).size().unstack(fill_value=0)
 
-        fig, ax = plt.subplots(figsize=(4, 3))  # smaller chart
-        counts.plot(kind="bar", stacked=True, ax=ax, legend=True)
-        ax.set_ylabel("Count")
-        ax.set_title("Brand Sentiment Trends", fontsize=11)
-        plt.xticks(rotation=15, ha="right")
+        fig, ax = plt.subplots(figsize=(3.5, 2.5))  # compact chart
+
+        # Define colors
+        colors = {
+            "Positive": "green",
+            "Negative": "red",
+            "Neutral": "gray"
+        }
+
+        bars = counts.plot(
+            kind="bar",
+            stacked=True,
+            ax=ax,
+            color=[colors.get(sent, "blue") for sent in counts.columns],
+            legend=True
+        )
+
+        # Add labels outside each stacked bar segment
+        for container in ax.containers:
+            ax.bar_label(container, label_type="edge", fontsize=8, padding=2)
+
+        ax.set_ylabel("Count", fontsize=9)
+        ax.set_title("Brand Sentiment Trends", fontsize=10)
+        plt.xticks(rotation=30, ha="right", fontsize=8)
         plt.tight_layout()
         st.pyplot(fig)
+
