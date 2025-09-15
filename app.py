@@ -139,7 +139,7 @@ with tab2:
         trend_df = pd.DataFrame(sentiment_summary, columns=["Brand", "Sentiment"])
         counts = trend_df.groupby(["Brand", "Sentiment"]).size().unstack(fill_value=0)
 
-                       # Place chart in a medium column
+                    # Place chart in a medium column
         col_chart, _ = st.columns([2, 1])  # chart takes medium space
         with col_chart:
             fig, ax = plt.subplots(figsize=(4.5, 3), dpi=120)  # medium box
@@ -151,17 +151,19 @@ with tab2:
             # Convert counts to percentages
             percent_df = counts.div(counts.sum(axis=1), axis=0) * 100
 
-            # Reindex to enforce consistent column order
+            # Reindex to enforce consistent order
             percent_df = percent_df.reindex(columns=ordered_cols, fill_value=0)
 
-            percent_df.plot(
-                kind="bar",
-                stacked=True,
-                ax=ax,
-                width=0.35,
-                color=[colors[c] for c in percent_df.columns],
-                legend=False
-            )
+            # Explicitly map colors column by column
+            for i, col in enumerate(percent_df.columns):
+                ax.bar(
+                    percent_df.index,
+                    percent_df[col],
+                    bottom=percent_df.iloc[:, :i].sum(axis=1),
+                    label=col,
+                    color=colors[col],
+                    width=0.35
+                )
 
             # Add percentage labels outside the bars
             for container in ax.containers:
@@ -182,7 +184,7 @@ with tab2:
             ax.set_title("Sentiment by Brand", fontsize=9)
             plt.xticks(rotation=30, ha="right", fontsize=7)
 
-            # Add custom legend on the right side
+            # Add legend on right side
             handles = [plt.Rectangle((0, 0), 1, 1, color=colors[c]) for c in ordered_cols]
             ax.legend(
                 handles, ordered_cols,
