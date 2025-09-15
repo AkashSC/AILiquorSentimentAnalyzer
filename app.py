@@ -150,17 +150,18 @@ with tab2:
             kind="bar",
             stacked=True,
             ax=ax,
+            width=0.5
             color=[colors.get(sent, "blue") for sent in counts.columns],
             legend=True
         )
 
         # Add labels outside each stacked bar segment
         for container in ax.containers:
-            ax.bar_label(container, label_type="edge", fontsize=8, padding=2)
+            ax.bar_label(container, label_type="edge", fontsize=5, padding=2)
 
-        ax.set_ylabel("Count", fontsize=9)
-        ax.set_title("Brand Sentiment Trends", fontsize=10)
-        plt.xticks(rotation=30, ha="right", fontsize=8)
+        ax.set_ylabel("Count", fontsize=5)
+        ax.set_title("Brand Sentiment Trends", fontsize=8)
+        plt.xticks(rotation=20, ha="right", fontsize=5)
         plt.tight_layout()
         st.pyplot(fig)
 
