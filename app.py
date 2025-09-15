@@ -24,7 +24,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
-GROQ_MODEL = "llama-3-groq-8b-tool-use"
+GROQ_MODEL = "llama-3.1-8b-instant"
 
 # ===============================
 # Helper: Call Groq API
@@ -141,6 +141,6 @@ with tab2:
         counts.plot(kind="bar", stacked=True, ax=ax, legend=True)
         ax.set_ylabel("Count")
         ax.set_title("Brand Sentiment Trends", fontsize=11)
-        plt.xticks(rotation=30, ha="right")
+        plt.xticks(rotation=15, ha="right")
         plt.tight_layout()
         st.pyplot(fig)
