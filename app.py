@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 st.set_page_config(page_title="🍷 Liquor Market Sentiment AI", layout="wide")
 
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
-GROQ_MODEL = "llama-3-groq-8b-tool-use"   # Free & lightweight option
+GROQ_MODEL = "llama-3.1-8b-instant"   # Free & lightweight option
 
 # ===============================
 # Helper: Call Groq API
