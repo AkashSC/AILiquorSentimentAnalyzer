@@ -139,26 +139,43 @@ with tab2:
         trend_df = pd.DataFrame(sentiment_summary, columns=["Brand", "Sentiment"])
         counts = trend_df.groupby(["Brand", "Sentiment"]).size().unstack(fill_value=0)
 
-        # Place chart in a smaller column so it doesn't stretch
-        col_chart, _ = st.columns([1, 2])  # chart in narrow column
+       # Place chart in a medium column
+        col_chart, _ = st.columns([2, 1])  # chart takes medium space
         with col_chart:
-            fig, ax = plt.subplots(figsize=(3, 2), dpi=120)  # compact size
+            fig, ax = plt.subplots(figsize=(4.5, 3), dpi=120)  # medium box
 
             colors = {"Positive": "green", "Negative": "red", "Neutral": "gray"}
-            counts.plot(
+
+            # Convert counts to percentages
+            percent_df = counts.div(counts.sum(axis=1), axis=0) * 100
+
+            percent_df.plot(
                 kind="bar",
                 stacked=True,
                 ax=ax,
-                width=0.5,
-                color=[colors.get(sent, "blue") for sent in counts.columns],
+                width=0.35,   # thinner bars
+                color=[colors.get(sent, "blue") for sent in percent_df.columns],
                 legend=True
             )
 
+            # Show sentiment % labels OUTSIDE the bar box
             for container in ax.containers:
-                ax.bar_label(container, label_type="edge", fontsize=7, padding=2)
+                for bar in container:
+                    value = bar.get_height()
+                    if value > 0:
+                        ax.text(
+                            bar.get_x() + bar.get_width() / 2,
+                            bar.get_y() + bar.get_height() + 1,   # position ABOVE bar
+                            f"{value:.0f}%",
+                            ha="center",
+                            va="bottom",
+                            fontsize=8,
+                            color="black"
+                        )
 
-            ax.set_ylabel("Count", fontsize=8)
+            ax.set_ylabel("Share (%)", fontsize=8)
             ax.set_title("Sentiment by Brand", fontsize=9)
             plt.xticks(rotation=30, ha="right", fontsize=7)
             plt.tight_layout()
             st.pyplot(fig, clear_figure=True)
+
