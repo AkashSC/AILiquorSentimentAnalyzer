@@ -110,6 +110,7 @@ with tab2:
     if not st.session_state.feedback_data:
         st.info("No feedback yet. Add some in the first tab.")
     else:
+        # Keep table
         df = pd.DataFrame([
             {
                 "Brand": item["brand"],
@@ -119,7 +120,10 @@ with tab2:
             for item in st.session_state.feedback_data
         ])
 
-       # Report-style bar chart with horizontal layout
+        st.subheader("📋 Recent Feedback & Analysis")
+        st.dataframe(df, use_container_width=True, height=250)
+
+        # Compact sentiment chart
         st.subheader("📈 Brand Sentiment Trend")
 
         sentiment_summary = []
@@ -135,30 +139,26 @@ with tab2:
         trend_df = pd.DataFrame(sentiment_summary, columns=["Brand", "Sentiment"])
         counts = trend_df.groupby(["Brand", "Sentiment"]).size().unstack(fill_value=0)
 
-        fig, ax = plt.subplots(figsize=(5, 3))  # balanced report-like size
+        # Place chart in a smaller column so it doesn't stretch
+        col_chart, _ = st.columns([1, 2])  # chart in narrow column
+        with col_chart:
+            fig, ax = plt.subplots(figsize=(3, 2), dpi=120)  # compact size
 
-        # Define colors
-        colors = {"Positive": "green", "Negative": "red", "Neutral": "gray"}
+            colors = {"Positive": "green", "Negative": "red", "Neutral": "gray"}
+            counts.plot(
+                kind="bar",
+                stacked=True,
+                ax=ax,
+                width=0.5,
+                color=[colors.get(sent, "blue") for sent in counts.columns],
+                legend=True
+            )
 
-        # Horizontal bar chart
-        counts.plot(
-            kind="barh",
-            stacked=True,
-            ax=ax,
-            color=[colors.get(sent, "blue") for sent in counts.columns],
-            width=0.6
-        )
+            for container in ax.containers:
+                ax.bar_label(container, label_type="edge", fontsize=7, padding=2)
 
-        # Add labels outside each bar
-        for container in ax.containers:
-            ax.bar_label(container, label_type="edge", fontsize=8, padding=2)
-
-        ax.set_xlabel("Feedback Count", fontsize=9)
-        ax.set_ylabel("Brand", fontsize=9)
-        ax.set_title("Brand Sentiment Trends", fontsize=10)
-        plt.tight_layout()
-
-        # Center the chart inside Streamlit
-        st.pyplot(fig, clear_figure=True)
-
-
+            ax.set_ylabel("Count", fontsize=8)
+            ax.set_title("Sentiment by Brand", fontsize=9)
+            plt.xticks(rotation=30, ha="right", fontsize=7)
+            plt.tight_layout()
+            st.pyplot(fig, clear_figure=True)
