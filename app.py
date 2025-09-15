@@ -119,11 +119,9 @@ with tab2:
             for item in st.session_state.feedback_data
         ])
 
-        st.subheader("📋 Recent Feedback & Analysis")
-        st.dataframe(df, use_container_width=True, height=300)
-
-        # Small bar chart with color coding + labels outside
+       # Report-style bar chart with horizontal layout
         st.subheader("📈 Brand Sentiment Trend")
+
         sentiment_summary = []
         for item in st.session_state.feedback_data:
             analysis = str(item["result"].get("raw", "")).lower()
@@ -137,31 +135,30 @@ with tab2:
         trend_df = pd.DataFrame(sentiment_summary, columns=["Brand", "Sentiment"])
         counts = trend_df.groupby(["Brand", "Sentiment"]).size().unstack(fill_value=0)
 
-        fig, ax = plt.subplots(figsize=(3.5, 2.5))  # compact chart
+        fig, ax = plt.subplots(figsize=(5, 3))  # balanced report-like size
 
         # Define colors
-        colors = {
-            "Positive": "green",
-            "Negative": "red",
-            "Neutral": "gray"
-        }
+        colors = {"Positive": "green", "Negative": "red", "Neutral": "gray"}
 
-        bars = counts.plot(
-            kind="bar",
+        # Horizontal bar chart
+        counts.plot(
+            kind="barh",
             stacked=True,
             ax=ax,
-            width=0.5,
             color=[colors.get(sent, "blue") for sent in counts.columns],
-            legend=True
+            width=0.6
         )
 
-        # Add labels outside each stacked bar segment
+        # Add labels outside each bar
         for container in ax.containers:
-            ax.bar_label(container, label_type="edge", fontsize=5, padding=2)
+            ax.bar_label(container, label_type="edge", fontsize=8, padding=2)
 
-        ax.set_ylabel("Count", fontsize=5)
-        ax.set_title("Brand Sentiment Trends", fontsize=8)
-        plt.xticks(rotation=20, ha="right", fontsize=5)
+        ax.set_xlabel("Feedback Count", fontsize=9)
+        ax.set_ylabel("Brand", fontsize=9)
+        ax.set_title("Brand Sentiment Trends", fontsize=10)
         plt.tight_layout()
-        st.pyplot(fig)
+
+        # Center the chart inside Streamlit
+        st.pyplot(fig, clear_figure=True)
+
 
